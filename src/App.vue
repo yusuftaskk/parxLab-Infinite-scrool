@@ -1,10 +1,31 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+  <div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark " >
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse d-flex justify-content-center" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="/"
+              >Infinite Scrool <span class="sr-only">(current)</span></a
+            >
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="Pagination">Pagination</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <router-view />
   </div>
 </template>
 
@@ -19,6 +40,7 @@
 
 #nav {
   padding: 30px;
+  margin-top: 50px;
 }
 
 #nav a {
