@@ -18,16 +18,20 @@ export default new Vuex.Store({
       commit
     }) {
       axios
-        .get("https://count-book-on-premises-inventory-service-dev.azurewebsites.net/api/v1/Folder/GetFolders/1        ").then((response) => {
+        .get("  http://localhost:3000/il").then((response) => {
           console.log('response :>> ', response);
-          commit("getDat", response.data)
+          commit("getDat", response.data[0].ilceleri)
         })
     }
   },
   modules: {},
   getters: {
-    dataInfinite(state) {
+    datInf(state) {
       return state.data;
     }
   },
 })
+// axios
+// .get("https://count-book-on-premises-inventory-service-dev.azurewebsites.net/api/v1/Folder/GetFolders/1").then((response) => {
+//   console.log('response :>> ', response);
+//   commit("getDat", response)

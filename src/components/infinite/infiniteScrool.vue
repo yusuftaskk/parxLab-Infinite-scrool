@@ -1,117 +1,79 @@
 <template>
-  <div id="app">
-    <div class="list-group-container">
-      <ul class="list-group" @scroll="loadMore">
-        <!-- use @scroll.native when using a drag&drop library (like Vuedraggable) if you need to move the items to another column -->
-        <li class="list-group-item" v-for="(item, index) in items" :key="index">
-          <p>Item {{ index }}</p>
-        </li>
-      </ul>
-      <transition name="fade">
-        <p v-if="loading" class="loading">Loading</p>
-      </transition>
+  <div>
+    <div class="hacker-news-list">
+      <div class="hacker-news-header">
+        <a target="_blank" href="http://www.ycombinator.com/">
+          <img src="https://news.ycombinator.com/y18.gif" />
+        </a>
+        <span>Hacker News</span>
+      </div>
+      <div class="hacker-news-item d-flex justify-content-center"  v-for="(item, key) in list" :key="key">
+        <span class="num" v-text="key + 1"></span>
+        <p>
+          <a target="_blank" :href="item.url" v-text="item.title"></a>
+        </p>
+        <p>
+          <small>
+            <span v-text="item.points"></span>
+            points by
+            <a
+              target="_blank"
+              :href="'https://news.ycombinator.com/user?id=' + item.author"
+              v-text="item.author"
+            ></a>
+            |
+            <a
+              target="_blank"
+              :href="'https://news.ycombinator.com/item?id=' + item.objectID"
+              v-text="item.num_comments + ' comments'"
+            ></a>
+          </small>
+        </p>
+      </div>
+      <infinite-loading @infinite="infiniteHandler">
+        <span slot="no-more"> There is no more Hacker News :( </span>
+      </infinite-loading>
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import InfiniteLoading from "vue-infinite-loading";
+import axios from "axios";
+
+const api = "http://hn.algolia.com/api/v1/search_by_date?tags=story";
 
 export default {
   data() {
     return {
-      page: 1,
-      itemsPerPage: 20,
-      loading: false,
+      list: [],
     };
   },
-  computed: {
-    map() {
-      mapGetters(["dataInfinite"]);
-    },
-    items() {
-      return this.page * this.itemsPerPage;
-    },
-  },
-  mounted() {
-    this.$store.dispatch("getData");
-  },
   methods: {
-    loadMore(e) {
-      let { scrollTop, clientHeight, scrollHeight } = e.target;
-      if (!this.loading && scrollTop + clientHeight >= (scrollHeight * 4) / 5) {
-        this.loading = true;
-        setTimeout(() => {
-          this.page++;
-          this.loading = false;
-        }, 1000);
-      }
+    infiniteHandler($state) {
+      axios
+        .get(api, {
+          params: {
+            page: this.list.length / 20 + 1,
+          },
+        })
+        .then(({ data }) => {
+          console.log('data :>> ', data);
+          if (data.hits.length) {
+            this.list = this.list.concat(data.hits);
+            $state.loaded();
+            if (this.list.length / 20 === 10) {
+              $state.complete();
+            }
+          } else {
+            $state.complete();
+          }
+        });
     },
+  },
+  components: {
+    InfiniteLoading,
   },
 };
 </script>
 
-<style>
-* {
-  box-sizing: border-box;
-}
-
-#app {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 70vh;
-}
-
-.list-group-container {
-  position: relative;
-}
-
-.list-group {
-  width: 500px;
-  max-height: 50vh;
-  overflow-y: scroll;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.2), 0 0 0 1px rgba(10, 10, 10, 0.2);
-}
-
-.list-group .list-group-item {
-  padding: 10px 20px;
-  border-bottom: 1px solid rgba(44, 62, 80, 0.25);
-  cursor: pointer;
-}
-
-.list-group .list-group-item:first-child {
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.list-group .list-group-item:hover {
-  background: rgba(44, 62, 80, 0.07);
-}
-
-.loading {
-  position: absolute;
-  bottom: 15%;
-  left: 0;
-  right: 0;
-  width: 100px;
-  margin: auto;
-  padding: 10px 0;
-  color: #fff;
-  text-align: center;
-  background: #2c3e50;
-  border-radius: 4px;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.25s;
-}
-
-.fade-enter,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
